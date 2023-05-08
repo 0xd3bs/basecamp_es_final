@@ -1,5 +1,7 @@
 # Cohort 04 - Session 4: Testing Demo
 
+Repo clonado de https://github.com/robertkodra/basecamp_04_demo para realizar la tarea.
+
 This session aims to teach you how to start testing your contract in Cairo v1.
 
 Slides: TBA
@@ -111,6 +113,7 @@ fn test_transfer_to_zero() {
 
 # Homework
 
+
 ## Part 1
 
 In the `ERC20.cairo` file, within the `test_01_constructor()` test function, create the following tests:
@@ -118,6 +121,14 @@ In the `ERC20.cairo` file, within the `test_01_constructor()` test function, cre
 - check if the variable `decimals` has been initialized correctly.
 - check if the variable `total_suply` has been initialized correctly.
 - check if the balance of the `account` is equal to the `initial_supply`.
+
+## Aprendizaje:
+IMPORTATE: When implementing functions like _transfer and _approve, some checks needed to be
+done. During the contract compilation process, an error was encountered: The value does not
+fit within the range of type core::felt252. This error occurred because the ASCII value did
+not fit inside a felt252. It is important to note that the ASCII value must fit inside a felt252.
+Short Strings. En resumen el literaral del assert no puede superar los 31 Caracteres,
+tomado de https://github.com/codeWhizperer/min-cairo-project
 
 ## Part 2
 

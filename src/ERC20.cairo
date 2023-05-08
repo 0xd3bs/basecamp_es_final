@@ -140,6 +140,7 @@ mod tests{
     #[available_gas(2000000)]
     fn test_01_constructor(){
         let initial_supply: u256 = u256_from_felt252(2000);
+        let total_supply: u256 = u256_from_felt252(2000);
         let account: ContractAddress = contract_address_const::<1>();
         let decimals: u8 = 18_u8;
 
@@ -152,14 +153,20 @@ mod tests{
         assert(res_symbol == SYMBOL, 'Symbol does not match.');
 
         // Test decimals
-        // Your code here
+        assert(ERC20::get_decimals() == decimals, 'Decimals does not match.');
 
         // Test total_supply
-        // Your code here
+        assert(ERC20::get_total_supply() == total_supply, 'Total_supply does not match.');
+
+        // IMPORTATE: When implementing functions like _transfer and _approve, some checks needed to be
+        // done. During the contract compilation process, an error was encountered: The value does not
+        // fit within the range of type core::felt252. This error occurred because the ASCII value did
+        // not fit inside a felt252. It is important to note that the ASCII value must fit inside a felt252.
+        // Short Strings. En resumen el literaral del assert no puede superar los 31 Caracteres,
+        // tomado de https://github.com/codeWhizperer/min-cairo-project
 
         // Test the balance of the account variable
-
-        // Your code here
+        assert(ERC20::balance_of(account) == initial_supply, 'Balance of does not match.');
 
     }
 }
