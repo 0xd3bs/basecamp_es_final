@@ -5,6 +5,7 @@ description = "Workshop to learn the basics of testing a contract."
 homepage = ""
 
 [dependencies]
+starknet = ">=1.0.0"
 
 [scripts]
 test = "cairo-test --starknet ."

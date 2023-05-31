@@ -55,15 +55,29 @@ fn test_transfer_from() {
 
 #[test]
 #[available_gas(2000000)]
-fn test_burn() {
+#[should_panic]
+fn test_burn_by_owner_fake_owner() {
     let (owner, supply) = setup();
+    let fake_owner: ContractAddress = contract_address_const::<6>();
     let amount: u256 = u256_from_felt252(100);
-    ERC20::burn(owner, amount);
+
+    // Set account as default caller
+    set_caller_address(fake_owner);
+
+    ERC20::burn_by_owner(amount);
+}
+
+#[test]
+#[available_gas(2000000)]
+fn test_burn() {
+    let (account, supply) = setup();
+    let amount: u256 = u256_from_felt252(100);
+    ERC20::burn(account, amount);
     
     assert(ERC20::total_supply() == supply - amount, 'Total supply not change');
     
     // El balance del owner es igual al Supply inicial
-    assert(ERC20::balance_of(owner) == supply - amount, 'Balance Of not change');
+    assert(ERC20::balance_of(account) == supply - amount, 'Balance Of not change');
 
 }
 
@@ -71,9 +85,14 @@ fn test_burn() {
 #[available_gas(2000000)]
 #[should_panic]
 fn test_burn_fake_owner() {
-    let (owner, supply) = setup();
-    let fake_owner: ContractAddress = contract_address_const::<6>();
+    let (account, supply) = setup();
+    let fake_owner: ContractAddress = contract_address_const::<7>();
     let amount: u256 = u256_from_felt252(100);
+
     // Set account as default caller
+    set_caller_address(fake_owner);
+
     ERC20::burn(fake_owner, amount);
+
+    assert(ERC20::total_supply() == supply, 'Total supply not change');
 }

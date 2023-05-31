@@ -2,6 +2,7 @@
 
 use starknet::ContractAddress;
 
+#[abi]
 trait IERC20 {
     fn name() -> felt252;
     fn symbol() -> felt252;
@@ -13,13 +14,15 @@ trait IERC20 {
     fn transfer(recipient: ContractAddress, amount: u256) -> bool;
     fn transfer_from(sender: ContractAddress, recipient: ContractAddress, amount: u256) -> bool;
     fn approve(spender: ContractAddress, amount: u256) -> bool;
-    fn burn(owner: ContractAddress, amount: u256) -> bool;
+    fn burn(account: ContractAddress, amount: u256) -> bool;
+    fn burn_by_owner(amount: u256) -> bool;
 }
 
 #[contract]
 mod ERC20 {
-    use zeroable::Zeroable;
+
     use super::IERC20;
+    use zeroable::Zeroable;
     use starknet::get_caller_address;
     use starknet::ContractAddress;
     use starknet::contract_address::ContractAddressZeroable;
@@ -90,10 +93,18 @@ mod ERC20 {
             true
         }
 
-        fn burn(owner: ContractAddress, amount: u256) -> bool {
-            assert(owner == _owner::read(), 'No es el owner del contrato');
+        fn burn(account: ContractAddress, amount: u256) -> bool {
+            assert(!account.is_zero(), 'ERC20: burn from 0');
+            assert(total_supply() > amount, 'Total supply insuficiente');            
+            _balances::write(account,  _balances::read(account) - amount);
+            _total_supply::write(total_supply() - amount);
+            true
+        }        
+
+        fn burn_by_owner(amount: u256) -> bool {
+            assert(get_caller_address() == _owner::read(), 'No es el owner del contrato');
             assert(total_supply() > amount, 'Total supply insuficiente');
-            _balances::write(owner,  _balances::read(owner) - amount);
+            _balances::write(_owner::read(),  _balances::read(_owner::read()) - amount);
             _total_supply::write(total_supply() - amount);
             true
         }
@@ -170,8 +181,13 @@ mod ERC20 {
     }
 
     #[external]
-    fn burn(owner : ContractAddress, amount: u256) -> bool{
-        ERC20::burn(owner, amount)
+    fn burn(account: ContractAddress, amount: u256) -> bool {
+        ERC20::burn(account, amount)
+    }
+
+    #[external]
+    fn burn_by_owner(amount: u256) -> bool {
+        ERC20::burn_by_owner(amount)
     }     
 
     ///
